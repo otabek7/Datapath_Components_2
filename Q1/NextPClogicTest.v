@@ -23,7 +23,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 `define STRLEN 15
-module Decode24Test_v;
+module NextPClogicTest_v;
 	initial //This initial block used to dump all wire/reg values to dump file
      begin
        $dumpfile("NextPClogicTest.vcd");
@@ -59,28 +59,43 @@ module Decode24Test_v;
 	wire [63:0] NextPC;
 
 	// Instantiate the Unit Under Test (UUT)
-	Decode24 uut (
+	NextPClogic uut (
 		.CurrentPC(CurrentPC), 
 		.SignExtImm64(SignExtImm64),
         .Branch(Branch),
         .ALUZero(ALUZero),
         .Uncondbranch(Uncondbranch),
-        .NextPC(NextPC),
+        .NextPC(NextPC)
 	);
 
 	initial begin
 		// Initialize Inputs
-		in = 0;
-		passed = 0;
+		CurrentPC = 0;
+		SignExtImm64 = 2;
+        passed=0;
+
+        Branch = 0;
+        ALUZero=0;
+        Uncondbranch=0;
+   	    // Branch is true if the current instruction is a conditional branch instruction.
+        // Uncond branch is true if the current instruction is a Uncond branch instruction
 
 		// Add stimulus here
-		#90; in = 0; #10; passTest(out, 1, "Input 0", passed);
-		#90; in = 1; #10; passTest(out, 2, "Input 1", passed);
-		#90; in = 2; #10; passTest(out, 4, "Input 2", passed);
-		#90; in = 3; #10; passTest(out, 8, "Input 3", passed);
+		#90; Branch = 0; Uncondbranch = 0; ALUZero = 0; #10; passTest(NextPC, 4, "Input 0", passed);
+		#90; Branch = 0; Uncondbranch = 0; ALUZero = 1; #10; passTest(NextPC, 4, "Input 1", passed);
+
+		#90; Branch = 0; Uncondbranch = 1; ALUZero = 0; #10; passTest(NextPC, 4, "Input 2", passed);
+		#90; Branch = 0; Uncondbranch = 1; ALUZero = 1; #10; passTest(NextPC, 4'b1000, "Input 3", passed);
+		
+        #90; Branch = 1; Uncondbranch = 0; ALUZero = 0; #10; passTest(NextPC, 4, "Input 4", passed);
+		#90; Branch = 1; Uncondbranch = 0; ALUZero = 1; #10; passTest(NextPC, 4'b1000, "Input 5", passed);
+		
+        #90; Branch = 1; Uncondbranch = 1; ALUZero = 0; #10; passTest(NextPC, 4, "Input 6", passed);
+		#90; Branch = 1; Uncondbranch = 1; ALUZero = 1; #10; passTest(NextPC, 4'b1000, "Input 7", passed);
+
 		#90;
 		
-		allPassed(passed, 4);
+		allPassed(passed, 8);
 
 	end
       
